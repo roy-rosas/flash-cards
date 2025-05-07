@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Flashcards Game</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f8ff;
+        text-align: center;
+        padding: 50px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        padding: 30px;
+      }
+
+      .problem {
+        font-size: 36px;
+        margin: 20px 0;
+      }
+
+      input[type="number"] {
+        font-size: 24px;
+        padding: 10px;
+        width: 100px;
+        text-align: center;
+      }
+
+      button {
+        font-size: 18px;
+        margin-top: 20px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+
+      .result,
+      .score,
+      .timer,
+      .high-score {
+        margin-top: 20px;
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Flashcards</h1>
+      <div class="timer" id="timer">Time: 60</div>
+      <div class="score" id="score">Score: 0</div>
+      <div class="high-score" id="highScore">High Score: 0</div>
+      <div class="problem" id="problem">2 + 3 = ?</div>
+      <input type="number" id="answer" autocomplete="off" />
+      <br />
+      <button onclick="checkAnswer()" id="submitBtn">Submit</button>
+      <div class="result" id="result"></div>
+    </div>
+
+    <script>
+      let num1, num2
+      let score = 0
+      let timeLeft = 60
+      let timerInterval
+
+      function getHighScore() {
+        return parseInt(localStorage.getItem("highScore")) || 0
+      }
+
+      function setHighScore(newScore) {
+        localStorage.setItem("highScore", newScore)
+      }
+
+      function updateHighScoreDisplay() {
+        document.getElementById("highScore").textContent =
+          `High Score: ${getHighScore()}`
+      }
+
+      function generateProblem() {
+        num1 = Math.floor(Math.random() * 10) + 1 // 1 to 10
+        num2 = Math.floor(Math.random() * 10) + 1 // 1 to 10
+        document.getElementById("problem").textContent = `${num1} + ${num2} = ?`
+        document.getElementById("answer").value = ""
+        document.getElementById("answer").focus()
+        document.getElementById("result").textContent = ""
+      }
+
+      function checkAnswer() {
+        const userAnswer = parseInt(document.getElementById("answer").value)
+        const correctAnswer = num1 + num2
+        const resultEl = document.getElementById("result")
+
+        if (userAnswer === correctAnswer) {
+          score++
+          document.getElementById("score").textContent = `Score: ${score}`
+          resultEl.textContent = "✅ Correct!"
+          resultEl.style.color = "green"
+        } else {
+          resultEl.textContent = `❌ Incorrect. The answer was ${correctAnswer}.`
+          resultEl.style.color = "red"
+        }
+
+        setTimeout(generateProblem, 1000)
+      }
+
+      function updateTimer() {
+        document.getElementById("timer").textContent = `Time: ${timeLeft}`
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval)
+          endGame()
+        }
+        timeLeft--
+      }
+
+      function startGame() {
+        updateHighScoreDisplay()
+        generateProblem()
+        timerInterval = setInterval(updateTimer, 1000)
+      }
+
+      function endGame() {
+        const highScore = getHighScore()
+        if (score > highScore) {
+          setHighScore(score)
+          alert(`🎉 New High Score: ${score}!`)
+        }
+
+        updateHighScoreDisplay()
+        document.getElementById("result").textContent =
+          `⏰ Time's up! Final Score: ${score}`
+        document.getElementById("submitBtn").disabled = true
+        document.getElementById("answer").disabled = true
+      }
+
+      // Submit with Enter key
+      document
+        .getElementById("answer")
+        .addEventListener("keyup", function (event) {
+          if (event.key === "Enter") {
+            checkAnswer()
+          }
+        })
+
+      startGame()
+    </script>
+  </body>
+</html>
